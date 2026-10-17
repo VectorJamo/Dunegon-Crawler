@@ -1,0 +1,11 @@
+.vs/
+bin/
+bin-int/
+Dungeon-Crawler.sln
+Dungeon-Crawler.xcworkspace
+
+Dungeon-Crawler/*
+!Dungeon-Crawler/src/
+!Dungeon-Crawler/src/**
+!Dungeon-Crawler/res/
+!Dungeon-Crawler/res/**

@@ -1,0 +1,26 @@
+#pragma once
+#include "framework/entities/Entity.h"
+#include "framework/assets/AssetManager.h"
+
+class Dwarf : public Entity
+{
+private:
+	bool m_ShouldRenderFlipped;
+
+	float m_Health;
+
+public:
+	Dwarf(sf::Vector2f worldPosition, sf::Vector2f size, sf::Texture* texture, Rect textureArea, const std::string& entityName);
+	~Dwarf();
+
+	void Update(float deltaTime) override;
+
+	void Render(float cameraX, float cameraY, Window* window, bool renderCollisionRect);
+
+	inline float GetHealth() { return m_Health; }
+
+private:
+	void RenderCollisionRect(Window* window);
+};
+
+static Rect GetCollisionRectFromEntitySize(const sf::Vector2f& size);

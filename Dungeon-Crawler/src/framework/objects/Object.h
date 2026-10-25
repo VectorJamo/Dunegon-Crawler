@@ -43,8 +43,8 @@ public:
 
 	virtual void Update(float deltaTime);
 
-	void Render(float cameraX, float cameraY, Window* window);
-	void Render(float cameraX, float cameraY, Window* window, sf::Shader* shader);
+	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window);
+	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, sf::Shader* shader);
 
 	inline sf::Vector2f GetWorldPosition() { return m_WorldPosition; }
 	inline Sprite* GetObjectSprite() { return m_ObjectSprite; } // Use this if you need the entity size, rotation angle & local screen position

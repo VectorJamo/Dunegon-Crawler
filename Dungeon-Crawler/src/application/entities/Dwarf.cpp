@@ -32,7 +32,7 @@ Dwarf::~Dwarf()
 {
 }
 
-void Dwarf::Update(float deltaTime)
+void Dwarf::Update(float deltaTime, Camera* camera)
 {
 	m_ShouldRenderFlipped = false;
 
@@ -40,6 +40,7 @@ void Dwarf::Update(float deltaTime)
 	{
 		PlayAnimation("right");
 		m_WorldPosition.x += m_EntitySpeed * deltaTime;
+		//camera->ShakeCamera(2.0f);
 	}
 	else if (Input::IsKeyPressed(Key::A))
 	{
@@ -47,25 +48,33 @@ void Dwarf::Update(float deltaTime)
 		m_WorldPosition.x -= m_EntitySpeed * deltaTime;
 
 		m_ShouldRenderFlipped = true;
+		//camera->ShakeCamera(2.0f);
 	}
 	else if (Input::IsKeyPressed(Key::W))
+
 	{
 		PlayAnimation("up");
 		m_WorldPosition.y -= m_EntitySpeed * deltaTime;
+		//camera->ShakeCamera(2.0f);
 	}
 	else if (Input::IsKeyPressed(Key::S))
 	{
 		PlayAnimation("down");
 		m_WorldPosition.y += m_EntitySpeed * deltaTime;
+		//camera->ShakeCamera(2.0f);
 	}
+	else {
+		//camera->StopCameraShake(2.0f);
+	}
+
 }
 
-void Dwarf::Render(float cameraX, float cameraY, Window* window, bool renderCollisionRect)
+void Dwarf::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, bool renderCollisionRect)
 {
 	if (!m_ShouldRenderFlipped)
-		Entity::Render(cameraX, cameraY, window);
+		Entity::Render(cameraPosition, cameraRect, window);
 	else
-		Entity::RenderFlippedHorizontally(cameraX, cameraY, window);
+		Entity::RenderFlippedHorizontally(cameraPosition, cameraRect, window);
 
 	if (!renderCollisionRect)
 		return;

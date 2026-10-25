@@ -1,5 +1,7 @@
 #include "UILayer.h"
 
+#include "application/tilemap/MapConstants.h"
+
 UILayer::UILayer()
 {
 	m_Assets = new AssetManager();
@@ -7,7 +9,7 @@ UILayer::UILayer()
 	m_Assets->LoadTexture(m_Assets->GetFromImageDir("Tileset/tileset.png"));
 
 	m_VersionText = new Text(m_Assets->GetFontByName("8-bit/8-bit-pusab.ttf"), "Beta v1.0", {20.0f, 20.0f});
-	m_VersionText->SetCharacterSize(14);
+	m_VersionText->SetCharacterSize(MapConstants::TileSize / 2.0f);
 
 	m_HealthFullSprite = new Sprite(&m_Assets->GetTextureByName("Tileset/tileset.png"), { 48.0f, 48.0f }, { 16+4, 208+4, 8, 8 });
 	m_HealthEmptySprite = new Sprite(&m_Assets->GetTextureByName("Tileset/tileset.png"), { 48.0f, 48.0f }, { 0 + 4, 208 + 4, 8, 8 });

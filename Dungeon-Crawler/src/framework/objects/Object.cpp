@@ -8,7 +8,6 @@ Object::Object(sf::Vector2f worldPosition, sf::Vector2f size, sf::Texture* textu
 	m_AnimationComponent = new AnimationComponent();
 	m_CurrentDirection = ObjectDirection::IDLE;
 	m_ObjectSpeed = 100;
-
 }
 
 Object::Object(sf::Vector2f worldPosition, sf::Vector2f size, sf::Texture* texture, Rect textureArea)
@@ -79,19 +78,25 @@ void Object::Update(float deltaTime)
 {
 }
 
-void Object::Render(float cameraX, float cameraY, Window* window)
+void Object::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window)
 {
-	float screenPosX = (m_WorldPosition.x) - cameraX;
-	float screenPosY = (m_WorldPosition.y) - cameraY;
+	float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
+	float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
+
+	float screenPosX = (m_WorldPosition.x) - cameraTopLeftX;
+	float screenPosY = (m_WorldPosition.y) - cameraTopLeftY;
 
 	m_ObjectSprite->SetScreenPosition(sf::Vector2f(screenPosX, screenPosY));
 	m_ObjectSprite->Draw(window);
 }
 
-void Object::Render(float cameraX, float cameraY, Window* window, sf::Shader* shader)
+void Object::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, sf::Shader* shader)
 {
-	float screenPosX = (m_WorldPosition.x) - cameraX;
-	float screenPosY = (m_WorldPosition.y) - cameraY;
+	float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
+	float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
+
+	float screenPosX = (m_WorldPosition.x) - cameraTopLeftX;
+	float screenPosY = (m_WorldPosition.y) - cameraTopLeftY;
 
 	m_ObjectSprite->SetScreenPosition(sf::Vector2f(screenPosX, screenPosY));
 	m_ObjectSprite->Draw(window, shader);

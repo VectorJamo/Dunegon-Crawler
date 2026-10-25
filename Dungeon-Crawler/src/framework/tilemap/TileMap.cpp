@@ -1,9 +1,10 @@
 #include "TileMap.h"
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <iostream>
 
-TileMap::TileMap(Window* window, int32_t worldRows, int32_t worldCols, int32_t tileSize, const std::string& mapPath)
+TileMap::TileMap(Window* window, int32_t worldRows, int32_t worldCols, int32_t tileSize, const std::string& mapPath, bool loadFromCSV)
 	:m_Window(window), m_WorldRows(worldRows), m_WorldCols(worldCols), m_TileSize(tileSize)
 {
 	m_Map = new int32_t*[worldRows];
@@ -12,7 +13,10 @@ TileMap::TileMap(Window* window, int32_t worldRows, int32_t worldCols, int32_t t
 		m_Map[i] = new int32_t[worldCols];
 	}
 
-	LoadMap(mapPath);
+	if (loadFromCSV)
+		LoadCSVMap(mapPath);
+	else
+		LoadMap(mapPath);
 }
 
 TileMap::~TileMap()
@@ -56,19 +60,49 @@ void TileMap::LoadMap(const std::string& path)
 	}
 }
 
+void TileMap::LoadCSVMap(const std::string& path)
+{
+	std::ifstream file(path);
+	if (!file.is_open())
+	{
+		std::cout << "Cannot read CSV file: " << path << std::endl;
+		return;
+	}
+
+	std::string line;
+	int32_t row = 0;
+
+	while (std::getline(file, line))
+	{
+		int32_t col = 0;
+
+		std::stringstream ss(line); // Tile Row
+		std::string cell; // Tile
+
+		while (std::getline(ss, cell, ','))
+		{
+			int16_t tileNumber = std::stoi(cell);
+			m_Map[row][col] = tileNumber;
+
+			col++;
+		}
+		row++;
+	}
+}
+
 void TileMap::LogMap()
 {
 	for (int i = 0; i < m_WorldRows; i++)
 	{
 		for (int j = 0; j < m_WorldCols; j++)
 		{
-			std::cout << (int32_t)m_Map[i][j];
+			std::cout << (int32_t)m_Map[i][j] << ", ";
 		}
 		std::cout << std::endl;
 	}
 }
 
-void TileMap::Render()
+void TileMap::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect)
 {
 	if (!m_TileIdentity.empty())
 	{
@@ -85,12 +119,18 @@ void TileMap::Render()
 				
 					sf::Sprite sprite(*tileTexture);
 
-					float x = j * m_TileSize;
-					float y = i * m_TileSize;
+					float worldPosX = j * (float)m_TileSize;
+					float worldPosY = i * (float)m_TileSize;
+					
+					float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
+					float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
+
+					float screenPosX = worldPosX - cameraTopLeftX;
+					float screenPosY = worldPosY - cameraTopLeftY;
 
 					sf::Vector2u textureSize = tileTexture->getSize();
 
-					sprite.setPosition(sf::Vector2f(x, y));
+					sprite.setPosition(sf::Vector2f(screenPosX, screenPosY));
 					sprite.setScale(sf::Vector2f((float)m_TileSize/(float)textureSize.x, (float)m_TileSize/(float)textureSize.y));
 
 					m_Window->GetWindowInstance()->draw(sprite);
@@ -118,20 +158,25 @@ void TileMap::Render()
 				sf::IntRect srcRect(sf::Vector2i(textureRect.x, textureRect.y), sf::Vector2i(textureRect.width, textureRect.height));
 				sprite.setTextureRect(srcRect);
 
-				float x = j * m_TileSize;
-				float y = i * m_TileSize;
+				float worldPosX = j * (float)m_TileSize;
+				float worldPosY = i * (float)m_TileSize;
 
-				sprite.setPosition(sf::Vector2f(x, y));
+				float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
+				float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
+
+				float screenPosX = worldPosX - cameraTopLeftX;
+				float screenPosY = worldPosY - cameraTopLeftY;
+
+				sprite.setPosition(sf::Vector2f(screenPosX, screenPosY));
 				sprite.setScale(sf::Vector2f((float)m_TileSize / (float)textureRect.width, (float)m_TileSize / (float)textureRect.height));
 				
 				m_Window->GetWindowInstance()->draw(sprite);
 			}
 		}
 	}
-
 }
 
-void TileMap::Render(sf::Shader* shader)
+void TileMap::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, sf::Shader* shader)
 {
 	if (!m_TileIdentity.empty())
 	{
@@ -148,8 +193,8 @@ void TileMap::Render(sf::Shader* shader)
 
 					sf::Sprite sprite(*tileTexture);
 
-					float x = j * m_TileSize;
-					float y = i * m_TileSize;
+					float x = j * (float)m_TileSize;
+					float y = i * (float)m_TileSize;
 
 					sf::Vector2u textureSize = tileTexture->getSize();
 
@@ -180,8 +225,8 @@ void TileMap::Render(sf::Shader* shader)
 				sf::IntRect srcRect(sf::Vector2i(textureRect.x, textureRect.y), sf::Vector2i(textureRect.width, textureRect.height));
 				sprite.setTextureRect(srcRect);
 
-				float x = j * m_TileSize;
-				float y = i * m_TileSize;
+				float x = j * (float)m_TileSize;
+				float y = i * (float)m_TileSize;
 
 				sprite.setPosition(sf::Vector2f(x, y));
 				sprite.setScale(sf::Vector2f((float)m_TileSize / (float)textureRect.width, (float)m_TileSize / (float)textureRect.height));

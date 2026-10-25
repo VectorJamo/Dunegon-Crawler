@@ -48,10 +48,10 @@ public:
 
 	virtual void Update(float deltaTime);
 	
-	void Render(float cameraX, float cameraY, Window* window);
-	void Render(float cameraX, float cameraY, Window* window, sf::Shader* shader);
-	void RenderFlippedHorizontally(float cameraX, float cameraY, Window* window);
-	void RenderFlippedHorizontally(float cameraX, float cameraY, Window* window, sf::Shader* shader);
+	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window);
+	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, sf::Shader* shader);
+	void RenderFlippedHorizontally(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window);
+	void RenderFlippedHorizontally(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, sf::Shader* shader);
 
 	inline const sf::Vector2f& GetWorldPosition() { return m_WorldPosition; }
 	inline Sprite* GetEntitySprite() { return m_EntitySprite; } // Use this if you need the entity size, rotation angle & local screen position

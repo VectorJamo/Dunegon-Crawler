@@ -23,10 +23,11 @@ private:
 
 private:
 	void LoadMap(const std::string& path);
+	void LoadCSVMap(const std::string& path);
 	void LogMap();
 
 public:
-	TileMap(Window* window, int32_t worldRows, int32_t worldCols, int32_t tileSize, const std::string& mapPath);
+	TileMap(Window* window, int32_t worldRows, int32_t worldCols, int32_t tileSize, const std::string& mapPath, bool loadFromCSV = false);
 	~TileMap();
 
 	// If using 1 tile -> 1 texture
@@ -35,8 +36,8 @@ public:
 	// If using texture atlases
 	void SetTileIdentity(uint16_t tileNum, Tile* tile);
 
-	void Render();
-	void Render(sf::Shader* shader);
+	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect);
+	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, sf::Shader* shader);
 
 	int32_t** GetMap() { return m_Map; }
 };

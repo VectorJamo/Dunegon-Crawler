@@ -84,37 +84,49 @@ void Entity::Update(float deltaTime)
 {
 }
 
-void Entity::Render(float cameraX, float cameraY, Window* window)
+void Entity::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window)
 {
-	float screenPosX = (m_WorldPosition.x) - cameraX;
-	float screenPosY = (m_WorldPosition.y) - cameraY;
+	float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
+	float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
+
+	float screenPosX = (m_WorldPosition.x) - cameraTopLeftX;
+	float screenPosY = (m_WorldPosition.y) - cameraTopLeftY;
 
 	m_EntitySprite->SetScreenPosition(sf::Vector2f(screenPosX, screenPosY));
 	m_EntitySprite->Draw(window);
 }
 
-void Entity::Render(float cameraX, float cameraY, Window* window, sf::Shader* shader)
+void Entity::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, sf::Shader* shader)
 {
-	float screenPosX = (m_WorldPosition.x) - cameraX;
-	float screenPosY = (m_WorldPosition.y) - cameraY;
+	float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
+	float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
+
+	float screenPosX = (m_WorldPosition.x) - cameraTopLeftX;
+	float screenPosY = (m_WorldPosition.y) - cameraTopLeftY;
 
 	m_EntitySprite->SetScreenPosition(sf::Vector2f(screenPosX, screenPosY));
 	m_EntitySprite->Draw(window, shader);
 }
 
-void Entity::RenderFlippedHorizontally(float cameraX, float cameraY, Window* window)
+void Entity::RenderFlippedHorizontally(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window)
 {
-	float screenPosX = (m_WorldPosition.x) - cameraX;
-	float screenPosY = (m_WorldPosition.y) - cameraY;
+	float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
+	float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
+
+	float screenPosX = (m_WorldPosition.x) - cameraTopLeftX;
+	float screenPosY = (m_WorldPosition.y) - cameraTopLeftY;
 
 	m_EntitySprite->SetScreenPosition(sf::Vector2f(screenPosX, screenPosY));
 	m_EntitySprite->DrawFlippedHorizontally(window);
 }
 
-void Entity::RenderFlippedHorizontally(float cameraX, float cameraY, Window* window, sf::Shader* shader)
+void Entity::RenderFlippedHorizontally(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, sf::Shader* shader)
 {
-	float screenPosX = (m_WorldPosition.x) - cameraX;
-	float screenPosY = (m_WorldPosition.y) - cameraY;
+	float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
+	float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
+
+	float screenPosX = (m_WorldPosition.x) - cameraTopLeftX;
+	float screenPosY = (m_WorldPosition.y) - cameraTopLeftY;
 
 	m_EntitySprite->SetScreenPosition(sf::Vector2f(screenPosX, screenPosY));
 	m_EntitySprite->DrawFlippedHorizontally(window, shader);

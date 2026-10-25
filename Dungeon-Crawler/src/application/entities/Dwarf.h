@@ -2,6 +2,8 @@
 #include "framework/entities/Entity.h"
 #include "framework/assets/AssetManager.h"
 
+#include "application/systems/Camera.h"
+
 class Dwarf : public Entity
 {
 private:
@@ -13,9 +15,9 @@ public:
 	Dwarf(sf::Vector2f worldPosition, sf::Vector2f size, sf::Texture* texture, Rect textureArea, const std::string& entityName);
 	~Dwarf();
 
-	void Update(float deltaTime) override;
+	void Update(float deltaTime, Camera* camera);
 
-	void Render(float cameraX, float cameraY, Window* window, bool renderCollisionRect);
+	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, bool renderCollisionRect);
 
 	inline float GetHealth() { return m_Health; }
 

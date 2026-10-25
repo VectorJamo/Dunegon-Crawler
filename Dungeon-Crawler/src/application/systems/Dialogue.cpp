@@ -13,10 +13,13 @@ Dialogue::Dialogue(const std::string& dialogue, AssetManager* assetManager)
 	m_Text = new Text(assetManager->GetFontByName("8-bit/8-bit-pusab.ttf"));
 	m_Text->SetString(std::string(1, m_Dialogue[0]));
 	m_Text->SetPosition({ m_DialogueBox.getPosition().x + DialogueCharacterSize, m_DialogueBox.getPosition().y + DialogueCharacterSize });
+	m_Text->SetCharacterSize(DialogueCharacterSize);
 
 	m_CurrentChar = 0; 
 	m_Timer = 0.0f;
 	m_HasFinishedDialogue = false;
+	m_HasWrappedText = false;
+
 }
 
 Dialogue::~Dialogue()
@@ -34,6 +37,21 @@ void Dialogue::Update(float deltaTime)
 		{
 			m_CurrentChar++;
 			m_Text->SetString(m_Dialogue.substr(0, m_CurrentChar));
+
+			// Check for string wrapping
+			if (m_Text->GetWidth() > DialogueBoxWidth - 2*DialogueCharacterSize && !m_HasWrappedText)
+			{
+				m_HasWrappedText = true;
+
+				// Add \n in m_CurrentChar intervals until the end of the string.
+				int intervals = m_Dialogue.length() / m_CurrentChar;
+				std::cout << intervals << std::endl;
+
+				for (int i = 1; i <= intervals; i++)
+				{
+					m_Dialogue.insert(m_CurrentChar*i, 1, '\n');
+				}
+			}
 		}
 		else {
 			m_HasFinishedDialogue = true;
@@ -45,9 +63,4 @@ void Dialogue::Render(Window* window)
 {
 	window->GetWindowInstance()->draw(m_DialogueBox);
 	m_Text->Render(window);
-
-	if (m_HasFinishedDialogue)
-	{
-		
-	}
 }

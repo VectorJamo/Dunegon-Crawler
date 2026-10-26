@@ -18,6 +18,7 @@ Entity::Entity(sf::Vector2f worldPosition, sf::Vector2f size, sf::Texture* textu
 {
 	m_EntitySprite = new Sprite(texture, size);
 	m_EntitySprite->SetTextureRect(textureArea);
+	m_EntitySprite->SetScreenPosition(worldPosition); // Only initially. Will be replaced automatically later.
 
 	m_AnimationComponent = new AnimationComponent();
 	m_CurrentDirection = EntityDirection::IDLE;

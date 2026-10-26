@@ -40,4 +40,5 @@ public:
 	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, sf::Shader* shader);
 
 	int32_t** GetMap() { return m_Map; }
+	Tile* GetTileFromNumber(int32_t tileNum);
 };

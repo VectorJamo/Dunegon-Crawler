@@ -26,47 +26,59 @@ Dwarf::Dwarf(sf::Vector2f worldPosition, sf::Vector2f size, sf::Texture* texture
 
 	m_ShouldRenderFlipped = false;
 	m_Health = 80.0f;
+	m_EntitySpeed = 150.0f;
 }
 
 Dwarf::~Dwarf()
 {
 }
 
-void Dwarf::Update(float deltaTime, Camera* camera)
+void Dwarf::Update(float deltaTime, Camera* camera, TileMap* baseMapLayer, TileMap* objectsMapLayer)
 {
 	m_ShouldRenderFlipped = false;
+	m_CurrentDirection = EntityDirection::IDLE;
 
 	if (Input::IsKeyPressed(Key::D))
 	{
-		PlayAnimation("right");
-		m_WorldPosition.x += m_EntitySpeed * deltaTime;
-		//camera->ShakeCamera(2.0f);
+		m_CurrentDirection = EntityDirection::RIGHT;
 	}
 	else if (Input::IsKeyPressed(Key::A))
 	{
-		PlayAnimation("right");
-		m_WorldPosition.x -= m_EntitySpeed * deltaTime;
-
-		m_ShouldRenderFlipped = true;
-		//camera->ShakeCamera(2.0f);
+		m_CurrentDirection = EntityDirection::LEFT;
 	}
 	else if (Input::IsKeyPressed(Key::W))
-
 	{
-		PlayAnimation("up");
-		m_WorldPosition.y -= m_EntitySpeed * deltaTime;
-		//camera->ShakeCamera(2.0f);
+		m_CurrentDirection = EntityDirection::UP;
 	}
 	else if (Input::IsKeyPressed(Key::S))
 	{
-		PlayAnimation("down");
-		m_WorldPosition.y += m_EntitySpeed * deltaTime;
-		//camera->ShakeCamera(2.0f);
-	}
-	else {
-		//camera->StopCameraShake(2.0f);
+		m_CurrentDirection = EntityDirection::DOWN;
 	}
 
+	if (!(CollisionHandler::CheckEntityWorldCollision(baseMapLayer, this, deltaTime) || CollisionHandler::CheckEntityWorldCollision(objectsMapLayer, this, deltaTime)))
+	{
+		switch (m_CurrentDirection)
+		{
+		case EntityDirection::UP:
+			PlayAnimation("up");
+			m_WorldPosition.y -= m_EntitySpeed * deltaTime;
+			break;
+		case EntityDirection::DOWN:
+			PlayAnimation("down");
+			m_WorldPosition.y += m_EntitySpeed * deltaTime;
+			break;
+		case EntityDirection::LEFT:
+			PlayAnimation("right");
+			m_WorldPosition.x -= m_EntitySpeed * deltaTime;
+
+			m_ShouldRenderFlipped = true;
+			break;
+		case EntityDirection::RIGHT:
+			PlayAnimation("right");
+			m_WorldPosition.x += m_EntitySpeed * deltaTime;
+			break;
+		}
+	}
 }
 
 void Dwarf::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, bool renderCollisionRect)
@@ -80,6 +92,34 @@ void Dwarf::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window*
 		return;
 
 	RenderCollisionRect(window);
+}
+
+void Dwarf::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, bool renderCollisionRect, sf::Shader& shader)
+{
+	if (!m_ShouldRenderFlipped)
+		Entity::Render(cameraPosition, cameraRect, window, &shader);
+	else
+		Entity::RenderFlippedHorizontally(cameraPosition, cameraRect, window, &shader);
+
+	if (!renderCollisionRect)
+		return;
+
+	RenderCollisionRect(window);
+}
+
+Rect Dwarf::GetCollisionRectWorldBounds()
+{
+	// TODO: insert return statement here
+	Rect collisionRectLocalBounds = GetCollisionRectFromEntitySize(GetEntitySprite()->GetSize());
+	sf::Vector2f worldPos = { m_WorldPosition.x + collisionRectLocalBounds.x, m_WorldPosition.y + collisionRectLocalBounds.y };
+
+	Rect collisionRectGlobalBounds;
+	collisionRectGlobalBounds.x = worldPos.x;
+	collisionRectGlobalBounds.y = worldPos.y;
+	collisionRectGlobalBounds.width = collisionRectLocalBounds.width;
+	collisionRectGlobalBounds.height = collisionRectLocalBounds.height;
+
+	return collisionRectGlobalBounds;
 }
 
 void Dwarf::RenderCollisionRect(Window* window)
@@ -100,12 +140,12 @@ void Dwarf::RenderCollisionRect(Window* window)
 Rect GetCollisionRectFromEntitySize(const sf::Vector2f& size)
 {
 	// Collision Rect for a default 32x32 texture
-	Rect collisionRect = { 8, 16, 16, 16 };
+	Rect collisionRect = { 12, 20, 10, 10 };
 
-	float xMultiplier = 8.0f / 32.0f;
-	float yMultiplier = 16.0f / 32.0f;
-	float widthMultiplier = 16.0f / 32.0f;
-	float heightMultiplier = 16.0f / 32.0f;
+	float xMultiplier = collisionRect.x / 32.0f;
+	float yMultiplier = collisionRect.y / 32.0f;
+	float widthMultiplier = collisionRect.width / 32.0f;
+	float heightMultiplier = collisionRect.height / 32.0f;
 
 	return Rect(xMultiplier*size.x, yMultiplier*size.y, widthMultiplier*size.x, heightMultiplier*size.y);
 }

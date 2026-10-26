@@ -5,65 +5,78 @@ bool CollisionHandler::CheckEntityWorldCollision(TileMap* map, Entity* entity, f
     switch (entity->GetCurrentDirection())
     {
     case EntityDirection::UP: {
-        float newTopLeftX = entity->GetWorldPosition().x;
-        float newTopLeftY = entity->GetWorldPosition().y - entity->GetEntitySpeed() * deltaTime;
-        float newTopRightX = entity->GetWorldPosition().x + entity->GetEntitySprite()->GetSize().x;
-        float newTopRightY = entity->GetWorldPosition().y - entity->GetEntitySpeed() * deltaTime;
+        float newTopLeftX = entity->GetWorldPosition().x + entity->GetEntityCollisionRect().x;
+        float newTopLeftY = (entity->GetWorldPosition().y + entity->GetEntityCollisionRect().y) - entity->GetEntitySpeed() * deltaTime;
+        float newTopRightX = newTopLeftX + entity->GetEntityCollisionRect().width;
+        float newTopRightY = newTopLeftY;
 
         uint32_t topLeftTileCol = newTopLeftX / 32;
         uint32_t topLeftTileRow = newTopLeftY / 32;
         uint32_t topRightTileCol = newTopRightX / 32;
         uint32_t topRightTileRow = newTopRightY / 32;
 
-        if (map->GetMap()[topLeftTileRow][topLeftTileCol] != 0 || map->GetMap()[topRightTileRow][topRightTileCol] != 0)
+        int32_t topLeftTileNum = map->GetMap()[topLeftTileRow][topLeftTileCol];
+        int32_t topRightTileNum = map->GetMap()[topRightTileRow][topRightTileCol];
+
+        if ((topLeftTileNum != -1 && map->GetTileFromNumber(topLeftTileNum)->isCollideable) || (topRightTileNum != -1 && map->GetTileFromNumber(topRightTileNum)->isCollideable))
             return true;
         return false;
         break;
     }
     case EntityDirection::DOWN: {
-        float newBottomLeftX = entity->GetWorldPosition().x;
-        float newBottomLeftY = entity->GetWorldPosition().y + entity->GetEntitySprite()->GetSize().y + entity->GetEntitySpeed() * deltaTime;
-        float newBottomRightX = entity->GetWorldPosition().x + entity->GetEntitySprite()->GetSize().x;
-        float newBottomRightY = entity->GetWorldPosition().y + entity->GetEntitySprite()->GetSize().y + entity->GetEntitySpeed() * deltaTime;
+        float newBottomLeftX = entity->GetWorldPosition().x + entity->GetEntityCollisionRect().x;
+        float newBottomLeftY = (entity->GetWorldPosition().y + entity->GetEntityCollisionRect().y + entity->GetEntityCollisionRect().height) + entity->GetEntitySpeed() * deltaTime;
+        float newBottomRightX = newBottomLeftX + entity->GetEntityCollisionRect().width;
+        float newBottomRightY = newBottomLeftY;
 
         uint32_t bottomLeftTileCol = newBottomLeftX / 32;
         uint32_t bottomLeftTileRow = newBottomLeftY / 32;
         uint32_t bottomRightTileCol = newBottomRightX / 32;
         uint32_t bottomRightTileRow = newBottomRightY / 32;
 
-        if (map->GetMap()[bottomLeftTileRow][bottomLeftTileCol] != 0 || map->GetMap()[bottomRightTileRow][bottomRightTileCol] != 0)
+        int32_t bottomLeftTileNum = map->GetMap()[bottomLeftTileRow][bottomLeftTileCol];
+        int32_t bottomRightTileNum = map->GetMap()[bottomRightTileRow][bottomRightTileCol];
+
+        if ((bottomLeftTileNum != -1 && map->GetTileFromNumber(bottomLeftTileNum)->isCollideable) || (bottomRightTileNum != -1 && map->GetTileFromNumber(bottomRightTileNum)->isCollideable))
             return true;
         return false;
         break;
     }    
     case EntityDirection::LEFT: {
-        float newTopLeftX = entity->GetWorldPosition().x - entity->GetEntitySpeed() * deltaTime;
-        float newTopLeftY = entity->GetWorldPosition().y;
-        float newBottomLeftX = entity->GetWorldPosition().x - entity->GetEntitySpeed() * deltaTime;
-        float newBottomLeftY = entity->GetWorldPosition().y + entity->GetEntitySprite()->GetSize().y;
+        float newTopLeftX = (entity->GetWorldPosition().x + entity->GetEntityCollisionRect().x) - entity->GetEntitySpeed() * deltaTime;
+        float newTopLeftY = entity->GetWorldPosition().y + entity->GetEntityCollisionRect().y;
+        float newBottomLeftX = newTopLeftX;
+        float newBottomLeftY = entity->GetWorldPosition().y + entity->GetEntityCollisionRect().y + entity->GetEntityCollisionRect().height;
 
         uint32_t topLeftTileCol = newTopLeftX / 32;
         uint32_t topLeftTileRow = newTopLeftY / 32;
         uint32_t bottomLeftTileCol = newBottomLeftX / 32;
         uint32_t bottomLeftTileRow = newBottomLeftY / 32;
 
-        if (map->GetMap()[topLeftTileRow][topLeftTileCol] != 0 || map->GetMap()[bottomLeftTileRow][bottomLeftTileCol] != 0)
+        int32_t topLeftTileNum = map->GetMap()[topLeftTileRow][topLeftTileCol];
+        int32_t bottomLeftTileNum = map->GetMap()[bottomLeftTileRow][bottomLeftTileCol];
+
+
+        if ((topLeftTileNum != -1 && map->GetTileFromNumber(topLeftTileNum)->isCollideable) || (bottomLeftTileNum != -1 && map->GetTileFromNumber(bottomLeftTileNum)->isCollideable))
             return true;
         return false;
         break;
     }
     case EntityDirection::RIGHT: {
-        float newTopRightX = entity->GetWorldPosition().x + entity->GetEntitySprite()->GetSize().x + entity->GetEntitySpeed() * deltaTime;
-        float newTopRightY = entity->GetWorldPosition().y;
-        float newBottomRightX = entity->GetWorldPosition().x + entity->GetEntitySprite()->GetSize().x + entity->GetEntitySpeed() * deltaTime;
-        float newBottomRightY = entity->GetWorldPosition().y + entity->GetEntitySprite()->GetSize().y;
+        float newTopRightX = entity->GetWorldPosition().x + entity->GetEntityCollisionRect().x + entity->GetEntityCollisionRect().width + entity->GetEntitySpeed() * deltaTime;
+        float newTopRightY = entity->GetWorldPosition().y + entity->GetEntityCollisionRect().y;
+        float newBottomRightX = newTopRightX;
+        float newBottomRightY = entity->GetWorldPosition().y + entity->GetEntityCollisionRect().y + entity->GetEntityCollisionRect().height;
 
         uint32_t topRightTileCol = newTopRightX / 32;
         uint32_t topRightTileRow = newTopRightY / 32;
         uint32_t bottomRightTileCol = newBottomRightX / 32;
         uint32_t bottomRightTileRow = newBottomRightY / 32;
 
-        if (map->GetMap()[topRightTileRow][topRightTileCol] != 0 || map->GetMap()[bottomRightTileRow][bottomRightTileCol] != 0)
+        int32_t topRightTileNum = map->GetMap()[topRightTileRow][topRightTileCol];
+        int32_t bottomRightTileNum = map->GetMap()[bottomRightTileRow][bottomRightTileCol];
+
+        if (( topRightTileNum != -1 && map->GetTileFromNumber(topRightTileNum)->isCollideable) || (bottomRightTileNum != -1 && map->GetTileFromNumber(bottomRightTileNum)->isCollideable))
             return true;
         return false;
         break;

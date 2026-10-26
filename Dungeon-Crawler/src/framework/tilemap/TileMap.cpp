@@ -111,17 +111,17 @@ void TileMap::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect)
 		{
 			for (int j = 0; j < m_WorldCols; j++)
 			{
-				uint8_t tileNum = m_Map[i][j];
+				int32_t tileNum = m_Map[i][j];
 
-				if (m_TileIdentity.find(tileNum) != m_TileIdentity.end()) 
+				if (m_TileIdentity.find(tileNum) != m_TileIdentity.end())
 				{
 					sf::Texture* tileTexture = m_TileIdentity[tileNum];
-				
+
 					sf::Sprite sprite(*tileTexture);
 
 					float worldPosX = j * (float)m_TileSize;
 					float worldPosY = i * (float)m_TileSize;
-					
+
 					float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
 					float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
 
@@ -131,7 +131,7 @@ void TileMap::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect)
 					sf::Vector2u textureSize = tileTexture->getSize();
 
 					sprite.setPosition(sf::Vector2f(screenPosX, screenPosY));
-					sprite.setScale(sf::Vector2f((float)m_TileSize/(float)textureSize.x, (float)m_TileSize/(float)textureSize.y));
+					sprite.setScale(sf::Vector2f((float)m_TileSize / (float)textureSize.x, (float)m_TileSize / (float)textureSize.y));
 
 					m_Window->GetWindowInstance()->draw(sprite);
 				}
@@ -144,12 +144,12 @@ void TileMap::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect)
 	{
 		for (int j = 0; j < m_WorldCols; j++)
 		{
-			uint8_t tileNum = m_Map[i][j];
+			int32_t tileNum = m_Map[i][j];
 
 			if (m_TileIdentityForAtlas.find(tileNum) != m_TileIdentityForAtlas.end())
 			{
 				TextureArea textureArea = m_TileIdentityForAtlas[tileNum]->textureArea;
-				
+
 				sf::Texture* texture = textureArea.texture;
 				Rect textureRect = textureArea.textureRect;
 
@@ -169,7 +169,7 @@ void TileMap::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect)
 
 				sprite.setPosition(sf::Vector2f(screenPosX, screenPosY));
 				sprite.setScale(sf::Vector2f((float)m_TileSize / (float)textureRect.width, (float)m_TileSize / (float)textureRect.height));
-				
+
 				m_Window->GetWindowInstance()->draw(sprite);
 			}
 		}
@@ -185,7 +185,7 @@ void TileMap::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, sf::S
 		{
 			for (int j = 0; j < m_WorldCols; j++)
 			{
-				uint8_t tileNum = m_Map[i][j];
+				int32_t tileNum = m_Map[i][j];
 
 				if (m_TileIdentity.find(tileNum) != m_TileIdentity.end())
 				{
@@ -193,12 +193,18 @@ void TileMap::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, sf::S
 
 					sf::Sprite sprite(*tileTexture);
 
-					float x = j * (float)m_TileSize;
-					float y = i * (float)m_TileSize;
+					float worldPosX = j * (float)m_TileSize;
+					float worldPosY = i * (float)m_TileSize;
+
+					float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
+					float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
+
+					float screenPosX = worldPosX - cameraTopLeftX;
+					float screenPosY = worldPosY - cameraTopLeftY;
 
 					sf::Vector2u textureSize = tileTexture->getSize();
 
-					sprite.setPosition(sf::Vector2f(x, y));
+					sprite.setPosition(sf::Vector2f(screenPosX, screenPosY));
 					sprite.setScale(sf::Vector2f((float)m_TileSize / (float)textureSize.x, (float)m_TileSize / (float)textureSize.y));
 
 					m_Window->GetWindowInstance()->draw(sprite, shader);
@@ -212,27 +218,40 @@ void TileMap::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, sf::S
 	{
 		for (int j = 0; j < m_WorldCols; j++)
 		{
-			uint8_t tileNum = m_Map[i][j];
+			int32_t tileNum = m_Map[i][j];
 
 			if (m_TileIdentityForAtlas.find(tileNum) != m_TileIdentityForAtlas.end())
 			{
 				TextureArea textureArea = m_TileIdentityForAtlas[tileNum]->textureArea;
-				
+
+				sf::Texture* texture = textureArea.texture;
 				Rect textureRect = textureArea.textureRect;
 
-				sf::Sprite sprite(*textureArea.texture);
+				sf::Sprite sprite(*texture);
 
 				sf::IntRect srcRect(sf::Vector2i(textureRect.x, textureRect.y), sf::Vector2i(textureRect.width, textureRect.height));
 				sprite.setTextureRect(srcRect);
 
-				float x = j * (float)m_TileSize;
-				float y = i * (float)m_TileSize;
+				float worldPosX = j * (float)m_TileSize;
+				float worldPosY = i * (float)m_TileSize;
 
-				sprite.setPosition(sf::Vector2f(x, y));
+				float cameraTopLeftX = cameraPosition.x - cameraRect.x / 2;
+				float cameraTopLeftY = cameraPosition.y - cameraRect.y / 2;
+
+				float screenPosX = worldPosX - cameraTopLeftX;
+				float screenPosY = worldPosY - cameraTopLeftY;
+
+				sprite.setPosition(sf::Vector2f(screenPosX, screenPosY));
 				sprite.setScale(sf::Vector2f((float)m_TileSize / (float)textureRect.width, (float)m_TileSize / (float)textureRect.height));
 
 				m_Window->GetWindowInstance()->draw(sprite, shader);
 			}
 		}
 	}
+
+}
+
+Tile* TileMap::GetTileFromNumber(int32_t tileNum)
+{
+	return m_TileIdentityForAtlas[tileNum];
 }

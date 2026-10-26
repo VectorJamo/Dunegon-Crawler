@@ -1,34 +1,31 @@
+#version 120
+
+// All the lighting calculations are done in screen-space (for now)
 uniform sampler2D texture;
 
-uniform ivec2 playerPosition;
-
-uniform ivec2 explosionPositions[10];
-uniform float numExplosions;
-
-float CalculateLightIntensity(vec2 lightPosition, int multiplier)
-{
-    int windowHeight = 32*20;
-
-    vec2 fragmentPosition = vec2(gl_FragCoord.x, float(windowHeight) - gl_FragCoord.y);
-
-    float dist = distance(lightPosition, fragmentPosition);
-
-    float intensity = clamp((1.0/dist)*float(multiplier), 0.0, 1.0);
-
-    return intensity;
-}
+uniform vec2 playerCenterScreenPos;
+uniform float screenHeight;
 
 void main()
 {
-    vec4 pixel = texture2D(texture, gl_TexCoord[0].xy);
+	vec4 pixel = texture2D(texture, gl_TexCoord[0].xy);
+	vec2 fragPos = vec2(gl_FragCoord.x, screenHeight - gl_FragCoord.y);
 
-    float finalIntensity = 0.0;
-    finalIntensity = CalculateLightIntensity(vec2(playerPosition), 60); // From the player
-    
-    for(int i = 0; i < int(numExplosions); i++)
-    {
-        finalIntensity += CalculateLightIntensity(vec2(explosionPositions[i]), 10); // From the explosions
-    }
+	// Ambient Light
+	vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
+	float ambientIntensity = 0.1;
+	vec4 ambientLight = ambientIntensity * lightColor;
 
-    gl_FragColor = finalIntensity * pixel;
+	vec4 ambientColor = ambientLight * pixel;
+
+	// Point Light
+	float dist = distance(fragPos, playerCenterScreenPos);
+	
+	float multiplier = 60.0;
+	float intensity = clamp((1.0/dist) * multiplier, 0.0, 1.0);
+	vec4 pointLight = lightColor * intensity;
+
+	vec4 pointLightColor = pointLight * pixel;
+
+	gl_FragColor = (ambientColor + pointLightColor);
 }

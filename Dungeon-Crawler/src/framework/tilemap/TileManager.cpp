@@ -8,7 +8,7 @@ TileManager::~TileManager()
 {
 }
 
-void TileManager::AddTile(const std::string& tileName, sf::Texture& texture, Rect& textureRect)
+void TileManager::AddTile(const std::string& tileName, sf::Texture& texture, Rect textureRect)
 {
 	Tile* tile = new Tile(tileName, texture, textureRect);
 

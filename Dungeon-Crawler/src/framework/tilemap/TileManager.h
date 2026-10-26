@@ -12,7 +12,7 @@ public:
 	TileManager();
 	~TileManager();
 
-	void AddTile(const std::string& tileName, sf::Texture& texture, Rect& textureRect);
+	void AddTile(const std::string& tileName, sf::Texture& texture, Rect textureRect);
 
 	Tile* GetTileByName(const std::string& tileName);
 };

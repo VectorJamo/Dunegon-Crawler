@@ -16,9 +16,9 @@ GameState::GameState(Window* window)
 
 	m_DialogueSystem = new DialogueSystem(m_Assets);
 
-	m_DialogueSystem->PushDialogueIntoQueue(new Dialogue("Me: Where am I?", m_Assets));
+	//m_DialogueSystem->PushDialogueIntoQueue(new Dialogue("Me: Where am I?", m_Assets));
 	//m_DialogueSystem->PushDialogueIntoQueue(new Dialogue("This is another one. This one will check for string wrapping!", m_Assets));
-	m_DialogueSystem->PlayCurrentDialogueQueue();
+	//m_DialogueSystem->PlayCurrentDialogueQueue();
 
 	m_Camera = new Camera(m_Player->GetWorldPosition(), {MapConstants::ScreenWidth, MapConstants::ScreenHeight});
 }

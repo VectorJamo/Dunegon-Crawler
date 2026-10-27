@@ -8,7 +8,7 @@ bool AnimationComponent::CheckAnimationExists(const std::string& animationName)
 }
 
 AnimationComponent::AnimationComponent()
-	:m_CurrentFrame(0), m_LastAnimation(" ")
+	:m_CurrentFrame(0.0f), m_LastAnimation(" ")
 {
 }
 
@@ -34,9 +34,10 @@ void AnimationComponent::PlayAnimation(const std::string& animationName)
 		const std::vector<Rect>& animationRects = m_Animations[animationName];
 		int32_t maxFrames = animationRects.size();
 
-		if (int(m_CurrentFrame) <= maxFrames - 1)
+		float nextFrame = m_CurrentFrame + m_AnimationSpeed;
+		if (int(nextFrame) < maxFrames)
 		{
-			m_CurrentFrame += m_AnimationSpeed;
+			m_CurrentFrame = nextFrame;
 			return;
 		}
 		m_CurrentFrame = 0;
@@ -54,7 +55,7 @@ Rect AnimationComponent::GetCurrentAnimationRect(const std::string& animationNam
 {
 	if (CheckAnimationExists(animationName))
 	{
-		return m_Animations[animationName][m_CurrentFrame];
+		return m_Animations[animationName][(int)m_CurrentFrame];
 	}
 	std::cout << "Animation Name: " << animationName << " does not exist." << std::endl;
 	return Rect(0, 0, 0, 0);

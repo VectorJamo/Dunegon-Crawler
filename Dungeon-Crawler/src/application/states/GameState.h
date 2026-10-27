@@ -27,7 +27,6 @@ private:
 	Dwarf* m_Player;
 
 	// Objects
-	std::vector<Torch*> m_Torches;
 	Torch* m_Torch;
 
 	// UI

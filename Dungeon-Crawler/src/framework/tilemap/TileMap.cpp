@@ -251,6 +251,24 @@ void TileMap::Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, sf::S
 
 }
 
+std::vector<sf::Vector2f> TileMap::GetWorldPositionsOfTileNumber(int32_t tileNumber)
+{
+	std::vector<sf::Vector2f> worldPositions;
+
+	for (int i = 0; i < m_WorldRows; i++)
+	{
+		for (int j = 0; j < m_WorldCols; j++)
+		{
+			int32_t tileNum = m_Map[i][j];
+
+			if (tileNum == tileNumber)
+				worldPositions.push_back({ j * (float)m_TileSize, i * (float)m_TileSize });
+		}
+	}
+
+	return worldPositions;
+}
+
 Tile* TileMap::GetTileFromNumber(int32_t tileNum)
 {
 	return m_TileIdentityForAtlas[tileNum];

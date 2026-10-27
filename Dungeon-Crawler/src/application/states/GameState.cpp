@@ -8,9 +8,11 @@ GameState::GameState(Window* window)
 {
 	LoadAssets();
 
-	InitObjects();
-	InitMap();
 	InitEntities();
+	m_Camera = new Camera(m_Player->GetWorldPosition(), {MapConstants::ScreenWidth, MapConstants::ScreenHeight});
+	InitMap();
+
+	InitObjects();
     
 	m_UILayer = new UILayer();
 
@@ -20,7 +22,6 @@ GameState::GameState(Window* window)
 	//m_DialogueSystem->PushDialogueIntoQueue(new Dialogue("This is another one. This one will check for string wrapping!", m_Assets));
 	//m_DialogueSystem->PlayCurrentDialogueQueue();
 
-	m_Camera = new Camera(m_Player->GetWorldPosition(), {MapConstants::ScreenWidth, MapConstants::ScreenHeight});
 }
 
 GameState::~GameState()
@@ -96,7 +97,6 @@ void GameState::InitMap()
 	m_Assets->LoadShader(m_Assets->GetFromShaderDir("fragmentShader.glsl"), sf::Shader::Type::Fragment);
 	// Set the texture uniform 
 	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("texture", sf::Shader::CurrentTexture);
-	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("torchScreenPosition", m_Torch->GetObjectSprite()->GetScreenPosition());
 }
 
 void GameState::InitEntities()
@@ -107,7 +107,18 @@ void GameState::InitEntities()
 
 void GameState::InitObjects()
 {
-	m_Torch = new Torch({2*32.0f, 8*32.0f}, {32.0f, 32.0f}, &m_Assets->GetTextureByName("Tileset/tileset.png"), Rect(368, 32, 16, 16));
+	m_ObjectsDataMap = new TileMap(GetWindow(), MapConstants::WorldTileRows, MapConstants::WorldTileCols, MapConstants::TileSize, "res/map/Layer_ObjectsData.csv", true);
+	std::vector<sf::Vector2f> torchWorldPositions = m_ObjectsDataMap->GetWorldPositionsOfTileNumber(83);
+
+	std::vector<sf::Vector2f> torchScreenPositions;
+	for (auto& twp : torchWorldPositions)
+		torchScreenPositions.push_back(m_Camera->GetScreenPosFromWorldPos(twp));
+
+	int numTorches = torchScreenPositions.size();
+	for (int i = 0; i < numTorches; i++)
+	{
+		m_Torches.emplace_back(new Torch(torchWorldPositions[i], { 32.0f, 32.0f }, &m_Assets->GetTextureByName("Tileset/tileset.png"), Rect(368, 32, 16, 16)));
+	}
 }
 
 void GameState::InitUI()
@@ -125,14 +136,23 @@ void GameState::Update(float deltaTime)
 		m_Player->Update(deltaTime, m_Camera, m_BaseMapLayer, m_ObjectsMapLayer);
 	}
 
-	m_Torch->Update(deltaTime);
+	int32_t size = m_Torches.size();
+	sf::Vector2f* torchScreenPositions = (sf::Vector2f*)_malloca(sizeof(sf::Vector2f) * size);
 
-	sf::Vector2f torchPos = m_Torch->GetObjectSprite()->GetScreenPosition();
-	sf::Vector2f torchSize = m_Torch->GetObjectSprite()->GetSize();
+	for (int i =0; i < m_Torches.size(); i++)
+	{
+		m_Torches[i]->Update(deltaTime);
 
-	sf::Vector2f torchCenter = torchPos + sf::Vector2f(torchSize.x/2, torchSize.y/2);
+		sf::Vector2f torchPos = m_Torches[i]->GetObjectSprite()->GetScreenPosition();
+		sf::Vector2f torchSize = m_Torches[i]->GetObjectSprite()->GetSize();
 
-	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("torchScreenPosition", torchCenter);
+		sf::Vector2f torchCenter = torchPos + sf::Vector2f(torchSize.x/2, torchSize.y/2);
+
+		torchScreenPositions[i] = torchCenter;
+	}
+
+	m_Assets->GetShaderByName("fragmentShader.glsl").setUniformArray("torchScreenPositions", torchScreenPositions, size);
+	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("numTorches", size);
 
 	sf::Vector2f playerScreenPos = m_Player->GetEntitySprite()->GetScreenPosition();
 	Rect playerCollisionBounds = m_Player->GetEntityCollisionRect();
@@ -150,7 +170,9 @@ void GameState::Render()
 	m_ObjectsMapLayer->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), &m_Assets->GetShaderByName("fragmentShader.glsl"));
 
 	m_Player->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), GetWindow(), false, m_Assets->GetShaderByName("fragmentShader.glsl"));
-	m_Torch->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), GetWindow(), &m_Assets->GetShaderByName("fragmentShader.glsl"));
+
+	for(auto& torch: m_Torches)
+		torch->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), GetWindow(), &m_Assets->GetShaderByName("fragmentShader.glsl"));
 
 	m_UILayer->Render(GetWindow(), m_Player->GetHealth());
 	m_DialogueSystem->Render(GetWindow());

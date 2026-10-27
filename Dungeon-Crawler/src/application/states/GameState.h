@@ -27,7 +27,7 @@ private:
 	Dwarf* m_Player;
 
 	// Objects
-	Torch* m_Torch;
+	std::vector<Torch*> m_Torches;
 
 	// UI
 	UILayer* m_UILayer;
@@ -39,7 +39,7 @@ private:
 	// TileMap
 	TileManager* m_Tiles;
 
-	TileMap* m_BaseMapLayer, *m_ObjectsMapLayer;
+	TileMap* m_BaseMapLayer, *m_ObjectsMapLayer, *m_ObjectsDataMap;
 
 private:
 	void LoadAssets();

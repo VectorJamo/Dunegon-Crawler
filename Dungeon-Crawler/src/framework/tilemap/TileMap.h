@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <vector>
 #include <unordered_map>
 
 #include "../utils/TextureArea.h"
@@ -38,6 +39,8 @@ public:
 
 	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect);
 	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, sf::Shader* shader);
+
+	std::vector<sf::Vector2f> GetWorldPositionsOfTileNumber(int32_t tileNumber);
 
 	int32_t** GetMap() { return m_Map; }
 	Tile* GetTileFromNumber(int32_t tileNum);

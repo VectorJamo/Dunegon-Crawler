@@ -86,3 +86,11 @@ void Camera::StopCameraShake(float shakeAmount)
 		}
 	}
 }
+
+sf::Vector2f Camera::GetScreenPosFromWorldPos(const sf::Vector2f& worldPos)
+{
+	float cameraTopLeftX = m_CameraPosition.x - m_CameraRect.x / 2;
+	float cameraTopLeftY = m_CameraPosition.y - m_CameraRect.y / 2;
+
+	return { worldPos.x - cameraTopLeftX, worldPos.y - cameraTopLeftY };
+}

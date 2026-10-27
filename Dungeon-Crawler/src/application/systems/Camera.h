@@ -21,6 +21,8 @@ public:
 	void ShakeCamera(float shakeAmount);
 	void StopCameraShake(float shakeAmount);
 
+	sf::Vector2f GetScreenPosFromWorldPos(const sf::Vector2f& worldPos);
+
 	inline const sf::Vector2f& GetCameraPosition() const { return m_CameraPosition; }
 	inline const sf::Vector2f& GetCameraVisibilityRect() const { return  m_CameraRect; }
 };

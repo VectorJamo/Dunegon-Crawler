@@ -6,6 +6,8 @@ uniform sampler2D texture;
 uniform vec2 playerCenterScreenPos;
 uniform float screenHeight;
 
+uniform vec2 torchScreenPosition;
+
 void main()
 {
 	vec4 pixel = texture2D(texture, gl_TexCoord[0].xy);
@@ -18,7 +20,7 @@ void main()
 
 	vec4 ambientColor = ambientLight * pixel;
 
-	// Point Light
+	// Player's Light
 	float dist = distance(fragPos, playerCenterScreenPos);
 	
 	float multiplier = 60.0;
@@ -27,5 +29,15 @@ void main()
 
 	vec4 pointLightColor = pointLight * pixel;
 
-	gl_FragColor = (ambientColor + pointLightColor);
+	// Torch's light
+	dist = distance(fragPos, torchScreenPosition);
+	multiplier = 40.0;
+	intensity = clamp((1.0/dist) * multiplier, 0.0, 1.0);
+
+	vec4 torchLightColorValue = vec4(1.0, 0.6, 0.6, 1.0);
+	vec4 torchLight = torchLightColorValue * intensity;
+
+	vec4 torchLightColor = torchLight * pixel;
+
+	gl_FragColor = (ambientColor + pointLightColor + torchLightColor);
 }

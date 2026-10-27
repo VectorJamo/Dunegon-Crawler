@@ -8,6 +8,7 @@ GameState::GameState(Window* window)
 {
 	LoadAssets();
 
+	InitObjects();
 	InitMap();
 	InitEntities();
     
@@ -95,6 +96,7 @@ void GameState::InitMap()
 	m_Assets->LoadShader(m_Assets->GetFromShaderDir("fragmentShader.glsl"), sf::Shader::Type::Fragment);
 	// Set the texture uniform 
 	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("texture", sf::Shader::CurrentTexture);
+	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("torchScreenPosition", m_Torch->GetObjectSprite()->GetScreenPosition());
 }
 
 void GameState::InitEntities()
@@ -105,6 +107,7 @@ void GameState::InitEntities()
 
 void GameState::InitObjects()
 {
+	m_Torch = new Torch({2*32.0f, 8*32.0f}, {32.0f, 32.0f}, &m_Assets->GetTextureByName("Tileset/tileset.png"), Rect(368, 32, 16, 16));
 }
 
 void GameState::InitUI()
@@ -122,6 +125,15 @@ void GameState::Update(float deltaTime)
 		m_Player->Update(deltaTime, m_Camera, m_BaseMapLayer, m_ObjectsMapLayer);
 	}
 
+	m_Torch->Update(deltaTime);
+
+	sf::Vector2f torchPos = m_Torch->GetObjectSprite()->GetScreenPosition();
+	sf::Vector2f torchSize = m_Torch->GetObjectSprite()->GetSize();
+
+	sf::Vector2f torchCenter = torchPos + sf::Vector2f(torchSize.x/2, torchSize.y/2);
+
+	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("torchScreenPosition", torchCenter);
+
 	sf::Vector2f playerScreenPos = m_Player->GetEntitySprite()->GetScreenPosition();
 	Rect playerCollisionBounds = m_Player->GetEntityCollisionRect();
 
@@ -138,6 +150,8 @@ void GameState::Render()
 	m_ObjectsMapLayer->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), &m_Assets->GetShaderByName("fragmentShader.glsl"));
 
 	m_Player->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), GetWindow(), false, m_Assets->GetShaderByName("fragmentShader.glsl"));
+	m_Torch->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), GetWindow(), &m_Assets->GetShaderByName("fragmentShader.glsl"));
+
 	m_UILayer->Render(GetWindow(), m_Player->GetHealth());
 	m_DialogueSystem->Render(GetWindow());
 }

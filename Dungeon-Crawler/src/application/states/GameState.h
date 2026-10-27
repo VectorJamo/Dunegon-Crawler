@@ -15,6 +15,7 @@
 #include "application/layers/UILayer.h"
 #include "application/systems/DialogueSystem.h"
 #include "application/systems/Camera.h"
+#include "application/objects/Torch.h"
 
 class GameState : public StateManager
 {
@@ -24,6 +25,10 @@ private:
 
 	// Entities
 	Dwarf* m_Player;
+
+	// Objects
+	std::vector<Torch*> m_Torches;
+	Torch* m_Torch;
 
 	// UI
 	UILayer* m_UILayer;

@@ -34,7 +34,7 @@ void AnimationComponent::PlayAnimation(const std::string& animationName)
 		const std::vector<Rect>& animationRects = m_Animations[animationName];
 		int32_t maxFrames = animationRects.size();
 
-		if (int(m_CurrentFrame) < maxFrames - 1)
+		if (int(m_CurrentFrame) <= maxFrames - 1)
 		{
 			m_CurrentFrame += m_AnimationSpeed;
 			return;

@@ -3,6 +3,8 @@
 Torch::Torch(sf::Vector2f worldPosition, sf::Vector2f size, sf::Texture* texture, Rect textureArea)
 	:Object(worldPosition, size, texture, textureArea)
 {
+	m_Name = "torch";
+
 	m_Animation = new AnimationComponent();
 	m_Animation->PushAnimationRect("torchAnimation", Rect(368, 32, 16, 16));
 	m_Animation->PushAnimationRect("torchAnimation", Rect(384, 32, 16, 16));

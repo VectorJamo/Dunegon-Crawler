@@ -18,10 +18,17 @@ GameState::GameState(Window* window)
 
 	m_DialogueSystem = new DialogueSystem(m_Assets);
 
-	//m_DialogueSystem->PushDialogueIntoQueue(new Dialogue("Me: Where am I?", m_Assets));
-	//m_DialogueSystem->PushDialogueIntoQueue(new Dialogue("This is another one. This one will check for string wrapping!", m_Assets));
-	//m_DialogueSystem->PlayCurrentDialogueQueue();
+	m_DialogueSystem->PushDialogueIntoQueue(new Dialogue("Me: Where am I?", m_Assets)); 
+	m_DialogueSystem->PlayCurrentDialogueQueue();
 
+	// Inventory
+	m_InventoryManager = new InventoryManager();
+	m_InventoryManager->PushItemIntoDatabase("torch", new InventoryItem("torch", 0, "Helps you see things..", new Sprite(&m_Assets->GetTextureByName("Tileset/tileset.png"),
+		Inventory::InventoryCellDimension, Rect(368, 32, 16, 16)), m_Assets->GetFontByName("8-bit/8-bit-pusab.ttf")));
+	m_InventoryManager->PushItemIntoDatabase("axe", new InventoryItem("axe", 0, "You never know who you'll run into..", new Sprite(&m_Assets->GetTextureByName("Tileset/tileset.png"),
+		Inventory::InventoryCellDimension, Rect(320, 32, 16, 16)), m_Assets->GetFontByName("8-bit/8-bit-pusab.ttf")));
+
+	m_Inventory = new Inventory(m_Assets->GetTextureByName("Misc/inventory.png"), m_InventoryManager);
 }
 
 GameState::~GameState()
@@ -37,6 +44,7 @@ void GameState::LoadAssets()
 	m_Assets = new AssetManager();
 	m_Assets->LoadTexture(m_Assets->GetFromImageDir("Tileset/tileset.png"));
 	m_Assets->LoadTexture(m_Assets->GetFromImageDir("Players/Dwarf/dwarf x1.png"));
+	m_Assets->LoadTexture(m_Assets->GetFromImageDir("Misc/inventory.png"));
 
 	m_Assets->LoadFont(m_Assets->GetFromFontDir("8-bit/8-bit-pusab.ttf"));
 	m_Assets->LoadFont(m_Assets->GetFromFontDir("roboto/Roboto-Regular.ttf"));
@@ -119,16 +127,25 @@ void GameState::InitObjects()
 	{
 		m_Torches.emplace_back(new Torch(torchWorldPositions[i], { 32.0f, 32.0f }, &m_Assets->GetTextureByName("Tileset/tileset.png"), Rect(368, 32, 16, 16)));
 	}
+
+	auto location = m_ObjectsDataMap->GetWorldPositionsOfTileNumber(80);
+	for (auto& loc : location)
+	{
+		m_Axe = new Axe(loc, { 32.0f, 32.0f }, m_Assets);
+	}
 }
 
 void GameState::InitUI()
 {
 }
 
+
 void GameState::Update(float deltaTime)
 {
+	// Update camera
 	m_Camera->Update(deltaTime, m_Player->GetWorldPosition(), m_Player->GetEntitySprite()->GetSize());
 	
+	// Update dialogue sytstem
 	m_DialogueSystem->Update(deltaTime);
 	
 	if (!m_DialogueSystem->IsCurrentlyPlaying())
@@ -136,10 +153,11 @@ void GameState::Update(float deltaTime)
 		m_Player->Update(deltaTime, m_Camera, m_BaseMapLayer, m_ObjectsMapLayer);
 	}
 
+	// Update objects
 	int32_t size = m_Torches.size();
-	sf::Vector2f* torchScreenPositions = (sf::Vector2f*)_malloca(sizeof(sf::Vector2f) * size);
+	sf::Vector2f* torchScreenPositions = (sf::Vector2f*)alloca(sizeof(sf::Vector2f) * size);
 
-	for (int i =0; i < m_Torches.size(); i++)
+	for (int i = 0; i < m_Torches.size(); i++)
 	{
 		m_Torches[i]->Update(deltaTime);
 
@@ -149,31 +167,84 @@ void GameState::Update(float deltaTime)
 		sf::Vector2f torchCenter = torchPos + sf::Vector2f(torchSize.x/2, torchSize.y/2);
 
 		torchScreenPositions[i] = torchCenter;
+
+		// Check for torch-player collision
+		if (CollisionHandler::CheckEntityObjectCollision(m_Player, m_Torches[i], deltaTime))
+		{
+			if (!m_Player->HasTorch())
+			{
+				// Add the torch to the inventory
+				m_Inventory->AddItem("torch");
+				m_Player->SetHasTorch(true);
+
+				// Play dialogue
+				m_DialogueSystem->PushDialogueIntoQueue(new Dialogue("Me: Got a torch!", m_Assets));
+				m_DialogueSystem->PlayCurrentDialogueQueue();
+
+				// Remove the torch
+				m_Torches.erase(m_Torches.begin() + i);
+			}
+		}
 	}
+
+	if (m_Axe != nullptr && CollisionHandler::CheckEntityObjectCollision(m_Player, m_Axe, deltaTime))
+	{
+		if (!m_Player->HasAxe())
+		{
+			// Add the torch to the inventory
+			m_Inventory->AddItem("axe");
+			m_Player->SetHasAxe(true);
+
+			// Play dialogue
+			m_DialogueSystem->PushDialogueIntoQueue(new Dialogue("Me: Got an axe!", m_Assets));
+			m_DialogueSystem->PlayCurrentDialogueQueue();
+
+			delete m_Axe;
+			m_Axe = nullptr;
+		}
+	}
+	if (m_Axe != nullptr)
+		m_Axe->Update(deltaTime);
+
+
+	m_Inventory->Update(deltaTime);
+
+
+	// Update shader uniforms
+	sf::Vector2f playerScreenPos = m_Player->GetEntitySprite()->GetScreenPosition();
+	Rect playerCollisionBounds = m_Player->GetEntityCollisionRect();
+
+	sf::Vector2f playerCenter = sf::Vector2f(playerScreenPos.x + playerCollisionBounds.x + playerCollisionBounds.width / 2,
+		playerScreenPos.y + playerCollisionBounds.y + playerCollisionBounds.height / 2);
 
 	m_Assets->GetShaderByName("fragmentShader.glsl").setUniformArray("torchScreenPositions", torchScreenPositions, size);
 	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("numTorches", size);
 
-	sf::Vector2f playerScreenPos = m_Player->GetEntitySprite()->GetScreenPosition();
-	Rect playerCollisionBounds = m_Player->GetEntityCollisionRect();
-
-	sf::Vector2f playerCenter = sf::Vector2f(playerScreenPos.x + playerCollisionBounds.x + playerCollisionBounds.width/2,
-		playerScreenPos.y + playerCollisionBounds.y + playerCollisionBounds.height / 2);
-
 	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("playerCenterScreenPos", playerCenter);
 	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("screenHeight", (float)MapConstants::ScreenHeight);
+	m_Assets->GetShaderByName("fragmentShader.glsl").setUniform("playerHasTorch", m_Player->HasTorch());
 }
 
 void GameState::Render()
 {
+	// Render map
 	m_BaseMapLayer->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), &m_Assets->GetShaderByName("fragmentShader.glsl"));
 	m_ObjectsMapLayer->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), &m_Assets->GetShaderByName("fragmentShader.glsl"));
 
-	m_Player->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), GetWindow(), false, m_Assets->GetShaderByName("fragmentShader.glsl"));
-
+	// Render objects
 	for(auto& torch: m_Torches)
 		torch->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), GetWindow(), &m_Assets->GetShaderByName("fragmentShader.glsl"));
 
-	m_UILayer->Render(GetWindow(), m_Player->GetHealth());
+	if (m_Axe != nullptr)
+		m_Axe->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), GetWindow(), &m_Assets->GetShaderByName("fragmentShader.glsl"));
+
+	// Render entities
+	m_Player->Render(m_Camera->GetCameraPosition(), m_Camera->GetCameraVisibilityRect(), GetWindow(), false, m_Assets->GetShaderByName("fragmentShader.glsl"));
+	
+	// Render dialogues
 	m_DialogueSystem->Render(GetWindow());
+	
+	// Render UI
+	m_UILayer->Render(GetWindow(), m_Player->GetHealth());
+	m_Inventory->Render(GetWindow());
 }

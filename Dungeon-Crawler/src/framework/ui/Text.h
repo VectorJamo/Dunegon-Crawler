@@ -28,5 +28,6 @@ public:
 
 	int32_t GetWidth();
 	int32_t GetHeight();
+	inline const sf::Vector2f& GetPosition() { return  m_Position; }
 };
 

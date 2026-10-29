@@ -6,6 +6,8 @@
 Dwarf::Dwarf(sf::Vector2f worldPosition, sf::Vector2f size, sf::Texture* texture, Rect textureArea, const std::string& entityName)
 	:Entity(worldPosition, size, texture, textureArea, entityName)
 {
+	m_Name = "dwarf";
+
 	SetEntityCollisionRect(GetCollisionRectFromEntitySize(size));
 	
 	// Animations
@@ -24,38 +26,74 @@ Dwarf::Dwarf(sf::Vector2f worldPosition, sf::Vector2f size, sf::Texture* texture
 	PushAnimationRect("down", { 32 * 2, 32 * 3, 32, 32 });
 	PushAnimationRect("down", { 32 * 3, 32 * 3, 32, 32 });
 
+	PushAnimationRect("attackRight", { 0, 4 * 32, 32, 32 });
+	PushAnimationRect("attackRight", { 32, 4 * 32, 32, 32 });
+	PushAnimationRect("attackRight", { 32 * 2, 4 * 32, 32, 32 });
+	PushAnimationRect("attackRight", { 32 * 3, 4 * 32, 32, 32 });
+
+	PushAnimationRect("attackUp", { 0, 6 * 32, 32, 32 });
+	PushAnimationRect("attackUp", { 32, 6 * 32, 32, 32 });
+	PushAnimationRect("attackUp", { 32 * 2, 6 * 32, 32, 32 });
+	PushAnimationRect("attackUp", { 32 * 3, 6 * 32, 32, 32 });
+
+	PushAnimationRect("attackDown", { 0, 5 * 32, 32, 32 });
+	PushAnimationRect("attackDown", { 32, 5 * 32, 32, 32 });
+	PushAnimationRect("attackDown", { 32 * 2, 5 * 32, 32, 32 });
+	PushAnimationRect("attackDown", { 32 * 3, 5 * 32, 32, 32 });
+
 	m_ShouldRenderFlipped = false;
-	m_Health = 80.0f;
+	m_Health = 100.0f;
 	m_EntitySpeed = 150.0f;
+	m_ShouldMove = false;
+	m_HasTorch = false;
+	m_HasAxe = false;
+	m_IsAttacking = false;
 }
 
 Dwarf::~Dwarf()
 {
 }
 
+void Dwarf::SetHasTorch(bool value)
+{
+	m_HasTorch = value;
+}
+
+void Dwarf::SetHasAxe(bool value)
+{
+	m_HasAxe = value;
+}
+
 void Dwarf::Update(float deltaTime, Camera* camera, TileMap* baseMapLayer, TileMap* objectsMapLayer)
 {
-	m_ShouldRenderFlipped = false;
-	m_CurrentDirection = EntityDirection::IDLE;
+	m_ShouldMove = false;
 
-	if (Input::IsKeyPressed(Key::D))
+	if (Input::IsKeyPressed(Key::D) && !m_IsAttacking)
 	{
 		m_CurrentDirection = EntityDirection::RIGHT;
+		m_ShouldMove = true;
+		m_ShouldRenderFlipped = false;
 	}
-	else if (Input::IsKeyPressed(Key::A))
+	else if (Input::IsKeyPressed(Key::A) && !m_IsAttacking)
 	{
 		m_CurrentDirection = EntityDirection::LEFT;
+		m_ShouldMove = true;
+		m_ShouldRenderFlipped = true;
 	}
-	else if (Input::IsKeyPressed(Key::W))
+	else if (Input::IsKeyPressed(Key::W) && !m_IsAttacking)
 	{
 		m_CurrentDirection = EntityDirection::UP;
+		m_ShouldMove = true;
+		m_ShouldRenderFlipped = false;
 	}
-	else if (Input::IsKeyPressed(Key::S))
+	else if (Input::IsKeyPressed(Key::S) && !m_IsAttacking)
 	{
 		m_CurrentDirection = EntityDirection::DOWN;
+		m_ShouldMove = true;
+		m_ShouldRenderFlipped = false;
 	}
 
-	if (!(CollisionHandler::CheckEntityWorldCollision(baseMapLayer, this, deltaTime) || CollisionHandler::CheckEntityWorldCollision(objectsMapLayer, this, deltaTime)))
+	if (m_ShouldMove && !m_IsAttacking && !(CollisionHandler::CheckEntityWorldCollision(baseMapLayer, this, deltaTime) || CollisionHandler::CheckEntityWorldCollision(objectsMapLayer, this, deltaTime)))
 	{
 		switch (m_CurrentDirection)
 		{
@@ -70,13 +108,39 @@ void Dwarf::Update(float deltaTime, Camera* camera, TileMap* baseMapLayer, TileM
 		case EntityDirection::LEFT:
 			PlayAnimation("right");
 			m_WorldPosition.x -= m_EntitySpeed * deltaTime;
-
-			m_ShouldRenderFlipped = true;
 			break;
 		case EntityDirection::RIGHT:
 			PlayAnimation("right");
 			m_WorldPosition.x += m_EntitySpeed * deltaTime;
 			break;
+		}
+	}
+
+	// Attack
+	if (m_HasAxe && Input::IsKeyPressed(Key::Space) && !m_IsAttacking)
+		m_IsAttacking = true;
+
+	if (m_IsAttacking)
+	{
+		switch (m_CurrentDirection)
+		{
+		case EntityDirection::UP:
+			PlayAnimation("attackUp");
+			break;
+		case EntityDirection::DOWN:
+			PlayAnimation("attackDown");
+			break;
+		case EntityDirection::LEFT:
+			PlayAnimation("attackRight");
+			break;
+		case EntityDirection::RIGHT:
+			PlayAnimation("attackRight");
+			break;
+		}
+
+		if (m_AnimationComponent->HasFinishedLastAnimation())
+		{
+			m_IsAttacking = false;
 		}
 	}
 }

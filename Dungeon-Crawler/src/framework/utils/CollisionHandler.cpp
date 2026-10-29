@@ -88,5 +88,98 @@ bool CollisionHandler::CheckEntityWorldCollision(TileMap* map, Entity* entity, f
 
 bool CollisionHandler::CheckEntityCollision(Entity* entity1, Entity* entity2, float deltaTime)
 {
-    return false;
+    Rect entity1CollisionRect, entity2CollisionRect;
+    entity1CollisionRect.x = entity1->GetWorldPosition().x + entity1->GetEntityCollisionRect().x;
+    entity1CollisionRect.y = entity1->GetWorldPosition().y + entity1->GetEntityCollisionRect().y;
+    entity1CollisionRect.width = entity1->GetEntityCollisionRect().width;
+    entity1CollisionRect.height = entity1->GetEntityCollisionRect().height;
+
+    entity2CollisionRect.x = entity2->GetWorldPosition().x + entity2->GetEntityCollisionRect().x;
+    entity2CollisionRect.y = entity2->GetWorldPosition().y + entity2->GetEntityCollisionRect().y;
+    entity2CollisionRect.width = entity2->GetEntityCollisionRect().width;
+    entity2CollisionRect.height = entity2->GetEntityCollisionRect().height;
+
+    // TODO: PERFORMANCE OPTIMIZATION. Only check for collision if the entity is within a certain distance of the another entity
+
+
+    switch (entity1->GetCurrentDirection())
+    {
+    case EntityDirection::UP:
+        entity1CollisionRect.y -= entity1->GetEntitySpeed() * deltaTime;
+        break;
+    case EntityDirection::DOWN:
+        entity1CollisionRect.y += entity1->GetEntitySpeed() * deltaTime;
+        break;
+    case EntityDirection::LEFT:
+        entity1CollisionRect.x -= entity1->GetEntitySpeed() * deltaTime;
+        break;
+    case EntityDirection::RIGHT:
+        entity1CollisionRect.x += entity1->GetEntitySpeed() * deltaTime;
+        break;
+    }
+
+    switch (entity2->GetCurrentDirection())
+    {
+    case EntityDirection::UP:
+        entity2CollisionRect.y -= entity1->GetEntitySpeed() * deltaTime;
+        break;
+    case EntityDirection::DOWN:
+        entity2CollisionRect.y += entity1->GetEntitySpeed() * deltaTime;
+        break;
+    case EntityDirection::LEFT:
+        entity2CollisionRect.x -= entity1->GetEntitySpeed() * deltaTime;
+        break;
+    case EntityDirection::RIGHT:
+        entity2CollisionRect.x += entity1->GetEntitySpeed() * deltaTime;
+        break;
+    }
+
+    if (entity1CollisionRect.x > entity2CollisionRect.x + entity2CollisionRect.width || entity1CollisionRect.x + entity1CollisionRect.width < entity2CollisionRect.x
+        || entity1CollisionRect.y > entity2CollisionRect.y + entity2CollisionRect.height || entity1CollisionRect.y + entity1CollisionRect.height < entity2CollisionRect.y)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool CollisionHandler::CheckEntityObjectCollision(Entity* entity, Object* object, float deltaTime)
+{
+    Rect entityCollisionRect;
+    entityCollisionRect.x = entity->GetWorldPosition().x + entity->GetEntityCollisionRect().x;
+    entityCollisionRect.y = entity->GetWorldPosition().y + entity->GetEntityCollisionRect().y;
+    entityCollisionRect.width = entity->GetEntityCollisionRect().width;
+    entityCollisionRect.height = entity->GetEntityCollisionRect().height;
+    
+    Rect objectCollisionRect;
+    objectCollisionRect.x = object->GetWorldPosition().x;
+    objectCollisionRect.y = object->GetWorldPosition().y;
+    objectCollisionRect.width = object->GetObjectSprite()->GetSize().x;
+    objectCollisionRect.height = object->GetObjectSprite()->GetSize().y;
+
+    // TODO: PERFORMANCE OPTIMIZATION. Only check for collision if the object is within a certain distance of the entity
+
+    switch (entity->GetCurrentDirection())
+    {
+    case EntityDirection::UP:
+        entityCollisionRect.y -= entity->GetEntitySpeed() * deltaTime;
+        break;
+    case EntityDirection::DOWN:
+        entityCollisionRect.y += entity->GetEntitySpeed() * deltaTime;
+        break;
+    case EntityDirection::LEFT:
+        entityCollisionRect.x -= entity->GetEntitySpeed() * deltaTime;
+        break;
+    case EntityDirection::RIGHT:
+        entityCollisionRect.x += entity->GetEntitySpeed() * deltaTime;
+        break;
+    }
+
+    if (entityCollisionRect.x > objectCollisionRect.x + objectCollisionRect.width || entityCollisionRect.x + entityCollisionRect.width < objectCollisionRect.x
+        || entityCollisionRect.y > objectCollisionRect.y + objectCollisionRect.height || entityCollisionRect.y + entityCollisionRect.height < objectCollisionRect.y)
+    {
+        return false;
+    }
+
+    return true;
 }

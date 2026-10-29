@@ -5,6 +5,8 @@
 #include "framework/ui/Text.h"
 #include "framework/assets/AssetManager.h"
 
+#include "TimedText.h"
+
 class UILayer
 {
 private:

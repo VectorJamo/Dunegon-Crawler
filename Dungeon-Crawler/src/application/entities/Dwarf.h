@@ -12,9 +12,15 @@ private:
 
 	float m_Health;
 
+	bool m_ShouldMove, m_HasTorch, m_HasAxe;
+	bool m_IsAttacking;
+
 public:
 	Dwarf(sf::Vector2f worldPosition, sf::Vector2f size, sf::Texture* texture, Rect textureArea, const std::string& entityName);
 	~Dwarf();
+
+	void SetHasTorch(bool value);
+	void SetHasAxe(bool value);
 
 	void Update(float deltaTime, Camera* camera, TileMap* baseMapLayer, TileMap* objectsMapLayer);
 
@@ -23,6 +29,9 @@ public:
 
 	inline float GetHealth() { return m_Health; }
 	inline Rect GetCollisionRectWorldBounds();
+
+	inline bool HasTorch() const { return m_HasTorch; }
+	inline bool HasAxe() const { return m_HasAxe; }
 
 private:
 	void RenderCollisionRect(Window* window);

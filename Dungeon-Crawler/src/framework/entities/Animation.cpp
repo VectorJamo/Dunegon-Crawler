@@ -29,6 +29,7 @@ void AnimationComponent::PlayAnimation(const std::string& animationName)
 		{
 			m_LastAnimation = animationName;
 			m_CurrentFrame = 0;
+			m_HasFinishedAnAnimation = false;
 		}
 
 		const std::vector<Rect>& animationRects = m_Animations[animationName];

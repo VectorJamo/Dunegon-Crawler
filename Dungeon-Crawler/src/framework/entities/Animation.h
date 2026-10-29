@@ -27,6 +27,6 @@ public:
 	void SetHasFinishedAnAnimation(bool value);
 
 	Rect GetCurrentAnimationRect(const std::string& animationName);
-	inline const bool& HasFinishedAnAnimation() { return m_HasFinishedAnAnimation; }
+	inline const bool& HasFinishedLastAnimation() { return m_HasFinishedAnAnimation; }
 };
 

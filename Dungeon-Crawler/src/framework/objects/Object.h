@@ -16,7 +16,9 @@ enum class ObjectDirection
 
 class Object
 {
-private:
+protected:
+	std::string m_Name;
+
 	Sprite* m_ObjectSprite;
 	AnimationComponent* m_AnimationComponent;
 
@@ -46,6 +48,7 @@ public:
 	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window);
 	void Render(sf::Vector2f cameraPosition, sf::Vector2f cameraRect, Window* window, sf::Shader* shader);
 
+	inline const std::string& GetObjectName() { return m_Name; }
 	inline sf::Vector2f GetWorldPosition() { return m_WorldPosition; }
 	inline Sprite* GetObjectSprite() { return m_ObjectSprite; } // Use this if you need the entity size, rotation angle & local screen position
 	inline const ObjectDirection& GetCurrentDirection() { return m_CurrentDirection; }
